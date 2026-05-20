@@ -16,10 +16,9 @@ const Project = require('../models/Project');
 router.get('/', async (req, res) => {
   try {
     const { featured } = req.query;
-    const filter = {};
-    if (featured === 'true') filter.featured = true;
-    const projects = await Project.find(filter).sort({ createdAt: -1 });
-
+    const where = {};
+    if (featured === 'true') where.featured = true;
+    const projects = await Project.findAll({ where, order: [['createdAt', 'DESC']] });
     res.status(200).json({ success: true, count: projects.length, data: projects });
   } catch (error) {
     res.status(500).json({
@@ -36,7 +35,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
     res.status(200).json({ success: true, data: project });
   } catch (error) {
@@ -102,10 +101,8 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid URL for github' });
     }
 
-    const newProject = new Project({ title, description, technologies: techs, image: normalize(image), link: cleanLink, github: cleanGithub, featured: !!featured });
-    await newProject.save();
-
-    res.status(201).json({ success: true, message: 'Project created successfully', data: newProject });
+    const created = await Project.create({ title, description, technologies: techs, image: normalize(image), link: cleanLink, github: cleanGithub, featured: !!featured });
+    res.status(201).json({ success: true, message: 'Project created successfully', data: created });
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -122,9 +119,8 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
-
     const { title, description, technologies, image, link, github, featured } = req.body;
 
     const normalize = (val) => {
@@ -170,9 +166,9 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
-    await project.remove();
+    await project.destroy();
     res.status(200).json({ success: true, message: 'Project deleted successfully', data: project });
   } catch (error) {
     res.status(500).json({

@@ -5,7 +5,7 @@
  */
 
 require('dotenv').config();
-const { connectDB } = require('../config/db');
+const { sequelize, connectDB } = require('../config/db');
 const Project = require('../models/Project');
 
 // Sample projects data
@@ -42,20 +42,25 @@ const sampleProjects = [
 // Function to connect to database and seed data
 async function seedDatabase() {
   try {
-    console.log('🔗 Connecting to MongoDB...');
+    console.log('🔗 Connecting to PostgreSQL...');
     await connectDB();
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to PostgreSQL');
 
     // Clear existing projects
     console.log('🗑️  Clearing existing projects...');
-    await Project.deleteMany({});
+    await Project.destroy({ where: {} });
     console.log('✅ Cleared existing projects');
 
     // Insert sample projects
     console.log('📝 Inserting sample projects...');
-    const createdProjects = await Project.insertMany(sampleProjects.map(p => ({
-      ...p,
+    const createdProjects = await Project.bulkCreate(sampleProjects.map(p => ({
+      title: p.title,
+      description: p.description,
       technologies: Array.isArray(p.technologies) ? p.technologies : (p.technologies || '').split(',').map(t => t.trim()),
+      image: p.image || null,
+      link: p.link || null,
+      github: p.github || null,
+      featured: !!p.featured,
     })));
     console.log(`✅ Successfully inserted ${createdProjects.length} projects`);
 
@@ -64,6 +69,8 @@ async function seedDatabase() {
       console.log(`${index + 1}. ${project.title} (Featured: ${project.featured})`);
     });
 
+    // Close connection
+    await sequelize.close();
     console.log('\n✨ Database seeding completed successfully!');
     process.exit(0);
   } catch (error) {

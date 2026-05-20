@@ -1,16 +1,48 @@
-const { Schema, model } = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const projectSchema = new Schema(
+/**
+ * Sequelize Project model for PostgreSQL
+ */
+const Project = sequelize.define(
+  'Project',
   {
-    title: { type: String, required: true, trim: true, maxlength: 200 },
-    description: { type: String, required: true, trim: true, maxlength: 2000 },
-    technologies: { type: [String], default: [] },
-    image: { type: String, default: null },
-    link: { type: String, default: null },
-    github: { type: String, default: null },
-    featured: { type: Boolean, default: false },
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    title: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    technologies: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    link: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    github: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    featured: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true, tableName: 'projects' }
 );
 
-module.exports = model('Project', projectSchema);
+module.exports = Project;
