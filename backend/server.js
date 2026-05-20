@@ -1,94 +1,77 @@
-/**
- * Portfolio Website - Backend Server
- * Express.js server with MongoDB (Mongoose) and REST API
- */
-
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
-const { connectDB } = require('./config/db');
-const projectRoutes = require('./routes/projectRoutes');
-const path = require('path');
+import express from "express";
+import cors from "cors";
+import { Sequelize, DataTypes } from "sequelize";
 
 const app = express();
-
-// ==================== Middleware ====================
-// Configure CORS to allow the frontend origin (set CLIENT_URL in env when deploying)
-const CLIENT_URL = process.env.CLIENT_URL || process.env.FRONTEND_URL || '';
-const corsOptions = {
-  origin: CLIENT_URL ? CLIENT_URL.split(',') : true,
-  credentials: true,
-};
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ==================== Database Connection & Server Start ====================
-const PORT = parseInt(process.env.PORT, 10) || 5000;
+/* ================= DATABASE ================= */
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+  logging: false,
+});
 
-async function startServer(startPort, maxTries = 10) {
-  let port = startPort;
-  for (let attempt = 0; attempt < maxTries; attempt++) {
-    try {
-      const server = await new Promise((resolve, reject) => {
-        const s = app.listen(port, () => resolve(s));
-        s.on('error', (err) => reject(err));
-      });
-      console.log(`🚀 Server running on http://localhost:${port}`);
-      return { server, port };
-    } catch (err) {
-      if (err && err.code === 'EADDRINUSE') {
-        console.warn(`⚠️ Port ${port} in use, trying ${port + 1}...`);
-        port += 1;
-        continue;
-      }
-      throw err;
-    }
-  }
-  throw new Error('Unable to bind to a port after multiple attempts');
-}
+/* ================= MODEL ================= */
+const Project = sequelize.define("Project", {
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+  },
+  tech: {
+    type: DataTypes.STRING,
+  },
+  link: {
+    type: DataTypes.STRING,
+  },
+});
 
-(async () => {
+/* ================= ROUTES ================= */
+
+// Health check
+app.get("/", (req, res) => {
+  res.send("Server is running 🚀");
+});
+
+// Get all projects
+app.get("/api/projects", async (req, res) => {
   try {
-    await connectDB();
-    await startServer(PORT);
+    const projects = await Project.findAll();
+    res.json(projects);
   } catch (err) {
-    console.error('❌ Failed to start server:', err.message);
-    process.exit(1);
+    res.status(500).json({ error: err.message });
   }
-})();
-
-// ==================== Routes ====================
-// Serve frontend static files
-const frontendPath = path.join(__dirname, '..', 'frontend');
-app.use(express.static(frontendPath));
-
-app.use('/api/projects', projectRoutes);
-
-// ==================== Health Check ====================
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ message: 'Server is running', timestamp: new Date() });
 });
 
-// ==================== Error Handling ====================
-app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.message);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    success: false,
+// Add project
+app.post("/api/projects", async (req, res) => {
+  try {
+    const project = await Project.create(req.body);
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ================= START SERVER ================= */
+const PORT = process.env.PORT || 5000;
+
+sequelize.sync().then(() => {
+  console.log("✅ Database connected");
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
   });
+}).catch(err => {
+  console.error("❌ DB error:", err);
 });
-
-// ==================== 404 Handler ====================
-// For non-API routes, serve the frontend app (SPA fallback)
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found', success: false });
-});
-
-// (server start handled after DB connect above)
