@@ -12,7 +12,7 @@ const Project = require('../models/Project');
 const sampleProjects = [
   {
     title: 'Bharath Heritage',
-    description: 'A cultural web platform showcasing India\'s heritage, traditions, and historical places with an interactive UI and curated content.',
+    description: "A cultural web platform showcasing India's heritage, traditions, and historical places with an interactive UI.",
     technologies: ['HTML', 'CSS', 'JavaScript'],
     image: 'https://via.placeholder.com/600x400?text=Bharath+Heritage',
     link: 'https://fsad-version-1-2.vercel.app/',
@@ -21,8 +21,8 @@ const sampleProjects = [
   },
   {
     title: 'Job Lane',
-    description: 'A full-stack job portal where users can search jobs, apply, and manage profiles with authentication and job management features.',
-    technologies: ['React', 'Node.js', 'Express', 'MongoDB'],
+    description: "A full-stack job portal where users can search jobs, apply, and manage profiles with authentication.",
+    technologies: ['MongoDB', 'Express', 'React', 'Node.js'],
     image: 'https://via.placeholder.com/600x400?text=Job+Lane',
     link: null,
     github: null,
@@ -30,12 +30,12 @@ const sampleProjects = [
   },
   {
     title: 'Personal Portfolio',
-    description: 'A modern responsive portfolio website with dark theme, glass UI, and smooth user experience showcasing projects and skills.',
+    description: "A modern responsive portfolio website with dark UI, clean design, and dynamic project integration.",
     technologies: ['HTML', 'CSS', 'JavaScript'],
     image: 'https://via.placeholder.com/600x400?text=Portfolio',
-    link: null,
+    link: 'https://myportfolio-web.vercel.app',
     github: 'https://github.com/sirisampathb/myportfolio_web',
-    featured: false,
+    featured: true,
   },
 ];
 

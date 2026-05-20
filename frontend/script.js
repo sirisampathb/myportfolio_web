@@ -13,6 +13,28 @@ const API_BASE_URL = window.API_BASE_URL
 
 console.log('📡 API Base URL (resolved):', API_BASE_URL);
 
+// Default projects list to show if backend returns empty or is loading/offline
+const DEFAULT_PROJECTS = [
+  {
+    "title": "Bharath Heritage",
+    "description": "A cultural web platform showcasing India's heritage, traditions, and historical places with an interactive UI.",
+    "tech": "HTML, CSS, JavaScript",
+    "link": "https://fsad-version-1-2.vercel.app/"
+  },
+  {
+    "title": "Job Lane",
+    "description": "A full-stack job portal where users can search jobs, apply, and manage profiles with authentication.",
+    "tech": "MERN Stack (MongoDB, Express, React, Node.js)",
+    "link": "#"
+  },
+  {
+    "title": "Personal Portfolio",
+    "description": "A modern responsive portfolio website with dark UI, clean design, and dynamic project integration.",
+    "tech": "HTML, CSS, JavaScript",
+    "link": "https://myportfolio-web.vercel.app"
+  }
+];
+
 // ==================== DOM READY ====================
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✅ DOM Content Loaded');
@@ -100,21 +122,17 @@ async function loadProjects() {
     console.log('✅ Projects fetched successfully:', data);
 
     // Handle API response format
-    const projects = data.data || data;
+    let projects = data.data || data;
 
     if (!Array.isArray(projects) || projects.length === 0) {
-      container.innerHTML = `
-        <div class="error">
-          <p>No projects found. Add some projects to your portfolio!</p>
-        </div>
-      `;
-      return;
+      console.log('⚠️ No projects found in DB, using default projects list');
+      projects = DEFAULT_PROJECTS;
     }
 
     displayProjects(projects);
   } catch (error) {
-    console.error('❌ Error loading projects:', error);
-    displayProjectsError(error.message);
+    console.error('❌ Error loading projects, falling back to default list:', error);
+    displayProjects(DEFAULT_PROJECTS);
   }
 }
 
