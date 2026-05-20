@@ -19,7 +19,41 @@
   --text-light: #e2e8f0;
   --accent: #3b82f6;
   --border: rgba(0,0,0,0.1);
+  /* Gradient palette (easy to swap) */
+  --g1: #0f172a;
+  --g2: #081233;
+  --g3: #3b82f6;
+  --g-speed: 10s;
 }
+
+/* Light theme overrides (swappable via data-theme attribute) */
+:root[data-theme="light"] {
+  --dark-bg: #f8fafc;
+  --light-bg: #ffffff;
+  --card: #ffffff;
+  --text-dark: #0b1220;
+  --text-light: #0b1220;
+  --accent: #2563eb;
+  --border: rgba(11,17,32,0.06);
+  --g1: #e0f2fe;
+  --g2: #c7d2fe;
+  --g3: #a78bfa;
+  --g-speed: 12s;
+}
+
+/* Theme toggle button styling */
+.theme-toggle {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.15s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.03); transform: translateY(-1px); }
+.theme-toggle:focus-visible { outline: 3px solid rgba(59,130,246,0.25); outline-offset: 3px; }
 
 /* ================= BODY ================= */
 body {
@@ -81,7 +115,15 @@ header {
 
 /* ================= HERO ================= */
 .hero {
-  background: linear-gradient(135deg, #0f172a, #020617);
+  position: relative;
+  /* fallback */
+  background-color: var(--g1);
+
+  /* animated multi-stop gradient using variables */
+  background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 50%, var(--g3) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift var(--g-speed) ease infinite;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,8 +131,24 @@ header {
   min-height: 100vh;
 }
 
+/* overlay to improve text contrast */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.18));
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ensure hero content sits above the overlay */
+.hero * {
+  position: relative;
+  z-index: 1;
+}
+
 .hero-title {
-  font-size: 3rem;
+  font-size: clamp(1.75rem, 6vw, 3rem);
 }
 
 .hero-subtitle {
@@ -201,10 +259,16 @@ section {
 
 /* ================= FOOTER ================= */
 footer {
-  background: #020617;
+  /* fallback */
+  background-color: #020617;
   color: #94a3b8;
   text-align: center;
   padding: 15px;
+
+  /* animated gradient to match hero */
+  background-image: linear-gradient(135deg, var(--g1) 0%, var(--g2) 50%, var(--g3) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift var(--g-speed) ease infinite;
 }
 
 /* ================= MOBILE ================= */
@@ -216,4 +280,29 @@ footer {
   .hero-title {
     font-size: 2rem;
   } 
+}
+
+/* animation keyframes */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  footer {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* visible focus outlines for accessibility */
+.cta-button:focus-visible,
+.nav-link:focus-visible,
+.project-link:focus-visible,
+.contact-link:focus-visible {
+  outline: 3px solid rgba(59,130,246,0.35);
+  outline-offset: 3px;
 }

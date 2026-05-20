@@ -17,10 +17,42 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize app
   setupMobileMenu();
+  setupThemeToggle();
   loadProjects();
   setupSmoothScroll();
   setupActiveNavLink();
 });
+
+// ==================== THEME TOGGLE ====================
+function setupThemeToggle() {
+  const toggle = document.getElementById('theme-toggle');
+  if (!toggle) return;
+
+  // Determine initial theme: localStorage -> prefers-color-scheme -> default dark
+  const saved = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  const initial = saved || (prefersLight ? 'light' : 'dark');
+  applyTheme(initial);
+
+  toggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+  });
+}
+
+function applyTheme(name) {
+  if (name === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) toggle.textContent = '🌞';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) toggle.textContent = '🌙';
+  }
+}
 
 // ==================== MOBILE MENU ====================
 /**
