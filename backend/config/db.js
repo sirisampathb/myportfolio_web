@@ -1,43 +1,22 @@
-const { Sequelize } = require('sequelize');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 /**
- * PostgreSQL Database Connection
- * Using Sequelize ORM
- */
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'portfolio_db',
-  process.env.DB_USER || 'postgres',
-  process.env.DB_PASSWORD || 'Siri@2007',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
-  }
-);
-
-/**
- * Test database connection
+ * MongoDB connection using Mongoose
+ * Exports a connectDB() function that connects and handles errors
  */
 const connectDB = async () => {
+  const uri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/portfolio_db';
   try {
-    await sequelize.authenticate();
-    console.log('✅ PostgreSQL Connected');
-    
-    // Sync all models with database (creates tables if they don't exist)
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
-    console.log('✅ Database Models Synced');
-  } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
     process.exit(1);
   }
 };
 
-module.exports = { sequelize, connectDB };
+module.exports = { connectDB, mongoose };

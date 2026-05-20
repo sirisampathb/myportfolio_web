@@ -5,57 +5,36 @@
  */
 
 require('dotenv').config();
-const { sequelize, connectDB } = require('../config/db');
+const { connectDB } = require('../config/db');
 const Project = require('../models/Project');
 
 // Sample projects data
 const sampleProjects = [
   {
-    title: 'E-Commerce Platform',
-    description: 'A full-stack e-commerce platform with user authentication, product catalog, shopping cart, and payment integration using Stripe. Features include product search, filtering, order history, and admin dashboard.',
-    technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe', 'JWT'],
-    image: 'https://via.placeholder.com/400x300?text=E-Commerce',
-    link: 'https://github.com/yourusername/ecommerce-platform',
+    title: 'Bharath Heritage',
+    description: 'A cultural web platform showcasing India\'s heritage, traditions, and historical places with an interactive UI and curated content.',
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    image: 'https://via.placeholder.com/600x400?text=Bharath+Heritage',
+    link: 'https://fsad-version-1-2.vercel.app/',
+    github: 'https://github.com/sirisampathb/FSAD_Version-1.2',
     featured: true,
   },
   {
-    title: 'Social Media App',
-    description: 'A social networking application where users can create profiles, post updates, follow other users, and engage with content through likes and comments. Includes real-time notifications and user messaging.',
-    technologies: ['React', 'Firebase', 'Redux', 'Material-UI', 'WebSocket'],
-    image: 'https://via.placeholder.com/400x300?text=Social+App',
-    link: 'https://github.com/yourusername/social-media-app',
+    title: 'Job Lane',
+    description: 'A full-stack job portal where users can search jobs, apply, and manage profiles with authentication and job management features.',
+    technologies: ['React', 'Node.js', 'Express', 'MongoDB'],
+    image: 'https://via.placeholder.com/600x400?text=Job+Lane',
+    link: null,
+    github: null,
     featured: true,
   },
   {
-    title: 'Task Management Application',
-    description: 'A collaborative task management tool with features like task creation, assignment, due dates, priority levels, and real-time collaboration. Includes team workspace and activity tracking.',
-    technologies: ['Vue.js', 'Express.js', 'PostgreSQL', 'Socket.io', 'Tailwind CSS'],
-    image: 'https://via.placeholder.com/400x300?text=Task+Manager',
-    link: 'https://github.com/yourusername/task-manager',
-    featured: true,
-  },
-  {
-    title: 'Weather Application',
-    description: 'A real-time weather application that displays current conditions, forecasts, and weather alerts. Features include location search, multiple location tracking, and weather maps integration.',
-    technologies: ['JavaScript', 'OpenWeather API', 'HTML5', 'CSS3', 'Geolocation API'],
-    image: 'https://via.placeholder.com/400x300?text=Weather+App',
-    link: 'https://github.com/yourusername/weather-app',
-    featured: false,
-  },
-  {
-    title: 'Blog Platform',
-    description: 'A content management system for creating and managing blog posts. Features include markdown editor, syntax highlighting, comments system, user authentication, and SEO optimization.',
-    technologies: ['Next.js', 'PostgreSQL', 'Express.js', 'Markdown-it', 'JWT'],
-    image: 'https://via.placeholder.com/400x300?text=Blog+Platform',
-    link: 'https://github.com/yourusername/blog-platform',
-    featured: false,
-  },
-  {
-    title: 'Fitness Tracker',
-    description: 'A personal fitness tracking application that records workouts, tracks progress, sets goals, and provides workout recommendations. Includes progress charts and community features.',
-    technologies: ['React Native', 'Node.js', 'PostgreSQL', 'Chart.js', 'Firebase'],
-    image: 'https://via.placeholder.com/400x300?text=Fitness+Tracker',
-    link: 'https://github.com/yourusername/fitness-tracker',
+    title: 'Personal Portfolio',
+    description: 'A modern responsive portfolio website with dark theme, glass UI, and smooth user experience showcasing projects and skills.',
+    technologies: ['HTML', 'CSS', 'JavaScript'],
+    image: 'https://via.placeholder.com/600x400?text=Portfolio',
+    link: null,
+    github: 'https://github.com/sirisampathb/myportfolio_web',
     featured: false,
   },
 ];
@@ -63,31 +42,27 @@ const sampleProjects = [
 // Function to connect to database and seed data
 async function seedDatabase() {
   try {
-    // Connect to database
-    console.log('🔗 Connecting to PostgreSQL...');
+    console.log('🔗 Connecting to MongoDB...');
     await connectDB();
-    console.log('✅ Connected to PostgreSQL');
+    console.log('✅ Connected to MongoDB');
 
     // Clear existing projects
     console.log('🗑️  Clearing existing projects...');
-    await Project.destroy({ where: {} });
+    await Project.deleteMany({});
     console.log('✅ Cleared existing projects');
 
     // Insert sample projects
     console.log('📝 Inserting sample projects...');
-    const createdProjects = await Project.bulkCreate(sampleProjects);
+    const createdProjects = await Project.insertMany(sampleProjects.map(p => ({
+      ...p,
+      technologies: Array.isArray(p.technologies) ? p.technologies : (p.technologies || '').split(',').map(t => t.trim()),
+    })));
     console.log(`✅ Successfully inserted ${createdProjects.length} projects`);
 
-    // Display inserted projects
     console.log('\n📋 Projects added:');
     createdProjects.forEach((project, index) => {
       console.log(`${index + 1}. ${project.title} (Featured: ${project.featured})`);
     });
-
-    // Disconnect from database
-    console.log('\n🔌 Disconnecting from PostgreSQL...');
-    await sequelize.close();
-    console.log('✅ Disconnected from PostgreSQL');
 
     console.log('\n✨ Database seeding completed successfully!');
     process.exit(0);

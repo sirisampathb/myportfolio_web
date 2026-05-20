@@ -1,6 +1,6 @@
 /**
  * Portfolio Website - Backend Server
- * Express.js server with PostgreSQL connection and REST API
+ * Express.js server with MongoDB (Mongoose) and REST API
  */
 
 const express = require('express');
@@ -14,7 +14,13 @@ const path = require('path');
 const app = express();
 
 // ==================== Middleware ====================
-app.use(cors());
+// Configure CORS to allow the frontend origin (set CLIENT_URL in env when deploying)
+const CLIENT_URL = process.env.CLIENT_URL || process.env.FRONTEND_URL || '';
+const corsOptions = {
+  origin: CLIENT_URL ? CLIENT_URL.split(',') : true,
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -33,12 +33,11 @@ A **production-ready, full-stack personal portfolio website** built with modern 
 - ✅ **Performance** - Fast loading times with optimized assets
 
 ### Backend
-- ✅ **RESTful API** - Complete CRUD operations for projects
-- ✅ **MongoDB Integration** - Persistent data storage with Mongoose ODM
-- ✅ **Error Handling** - Comprehensive error handling and validation
-- ✅ **CORS Enabled** - Secure cross-origin requests
-- ✅ **Environment Variables** - Secure configuration management
-- ✅ **Health Check** - API health monitoring endpoint
+- ✅ **RESTful API** - Complete CRUD operations for projects (GET/POST/PUT/DELETE)
+- ✅ **MongoDB (Mongoose)** - Cloud-ready data storage with schema validation
+- ✅ **Error Handling** - Clear HTTP responses and validation errors
+- ✅ **CORS & Env** - Configurable CORS origin and environment-driven config
+- ✅ **Health Check** - Lightweight `/api/health` endpoint
 
 ### Database
 - ✅ **MongoDB Atlas** - Cloud-hosted NoSQL database
@@ -58,8 +57,8 @@ A **production-ready, full-stack personal portfolio website** built with modern 
 ### Backend
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web application framework
-- **PostgreSQL** - Relational SQL database
-- **Sequelize** - ORM for PostgreSQL
+- **MongoDB Atlas** - Hosted NoSQL database
+- **Mongoose** - ODM for MongoDB
 - **dotenv** - Environment variable management
 - **CORS** - Cross-Origin Resource Sharing
 
@@ -121,27 +120,28 @@ Before you begin, ensure you have the following installed:
    cd portfolio-website
    ```
 
-2. **Install Backend Dependencies**
-   ```bash
-   npm install
-   ```
+2. **Install Dependencies**
+  ```bash
+  npm install
+  ```
 
 3. **Setup Environment Variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` and add your MongoDB connection string:
-   ```
-   MONGO_URI=mongodb+srv://username:password@cluster0.mongodb.net/portfolio_db
-   PORT=5000
-   NODE_ENV=development
-   ```
+  Copy the example and update values:
+  ```bash
+  cp .env.example .env
+  ```
+  Edit `.env` and set at minimum:
+  ```env
+  MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/portfolio_db?retryWrites=true&w=majority
+  PORT=5000
+  CLIENT_URL=http://localhost:3000
+  NODE_ENV=development
+  ```
 
 4. **Seed Sample Data (Optional)**
-   ```bash
-   node backend/scripts/seedData.js
-   ```
+  ```bash
+  node backend/scripts/seedData.js
+  ```
 
 5. **Start the Backend Server**
    ```bash
@@ -153,48 +153,23 @@ Before you begin, ensure you have the following installed:
    ```
 
 6. **Test the Backend**
-   - Open your browser and visit: `http://localhost:5000/api/health`
-   - You should see: `{ "message": "Server is running", "timestamp": "..." }`
+  - Open your browser and visit: `http://localhost:5000/api/health`
+  - You should see: `{ "message": "Server is running", "timestamp": "..." }`
 
-7. **Open Frontend**
-   - Open [index.html](frontend/index.html) in your browser or use a local server:
-   ```bash
-   cd frontend
-   python -m http.server 8000  # Python 3
-   # or
-   npx http-server            # Node.js
-   ```
+7. **Open Frontend (Development)**
+  - You can preview `frontend/index.html` directly in a browser or serve it from a static host.
+  - When developing together, the frontend JS will call `/api/projects` on the same origin. For separate hosting, set `window.API_BASE_URL` in the deployed site settings to your backend URL.
 
 ---
 
 ## 🔧 Backend Setup
 
-### Database Connection
+### Database Connection (MongoDB Atlas)
 
-The backend connects to MongoDB Atlas. Here's how to set it up:
-
-#### Step 1: Create MongoDB Atlas Cluster
-
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Sign up for a free account
-3. Create a new cluster
-4. Wait for cluster deployment (5-10 minutes)
-
-#### Step 2: Get Connection String
-
-1. Click "Connect" on your cluster
-2. Choose "Connect your application"
-3. Select "Node.js" as driver
-4. Copy the connection string
-5. Replace `<username>` and `<password>` with your credentials
-6. Add database name at the end: `...mongodb.net/portfolio_db`
-
-#### Step 3: Configure Environment
-
-Paste your connection string in `.env`:
-```
-MONGO_URI=mongodb+srv://yourUsername:yourPassword@cluster0.xxxx.mongodb.net/portfolio_db?retryWrites=true&w=majority
-```
+1. Create a free cluster at https://www.mongodb.com/cloud/atlas.
+2. Whitelist your IP or allow access from anywhere for quick testing (use IP restrictions in production).
+3. Create a database user and copy the connection string.
+4. Add the connection string to `.env` as `MONGODB_URI`.
 
 ### Project Model
 
@@ -395,6 +370,38 @@ DELETE /api/projects/:id
 ---
 
 ## 🗄️ Database Schema
+
+---
+
+## 🚢 Deployment Guide (Frontend: Vercel | Backend: Render/Railway | DB: MongoDB Atlas)
+
+1. **MongoDB Atlas**
+  - Create a cluster and a database user. Copy the connection string.
+  - In the cluster Network Access add the IPs or allow access from anywhere (less secure).
+
+2. **Backend (Render or Railway)**
+  - Create a new web service and connect your repo.
+  - Set the start command: `npm start` and set `PORT` (Render will provide it).
+  - Add environment variables: `MONGODB_URI` and `CLIENT_URL` (your Vercel URL).
+  - Deploy. Copy the service URL (e.g. `https://your-backend.onrender.com`).
+
+3. **Frontend (Vercel)**
+  - Create a new project in Vercel and point it to the `frontend/` folder.
+  - In Vercel settings, add an environment variable `API_BASE_URL` with your backend URL (optional).
+  - Alternatively, update `window.API_BASE_URL` in your deployed site via Vercel Environment or by editing `index.html`.
+
+4. **CORS**
+  - In your backend service set `CLIENT_URL` to your Vercel domain (e.g. `https://your-site.vercel.app`).
+  - Backend will accept requests from that origin.
+
+5. **Final Check**
+  - Visit your frontend site, open devtools Network tab, and ensure requests to `/api/projects` (or the backend URL) return `200` with project data.
+
+6. **Seed Data**
+  - SSH/Console into your backend service or run locally before deploying: `node backend/scripts/seedData.js` to populate sample projects.
+
+7. **Optional: Single Repo Deploy**
+  - If you prefer to host both frontend and backend together (Render static + web), the server already serves `frontend/` statically. Set `CLIENT_URL` accordingly.
 
 ### Project Collection
 

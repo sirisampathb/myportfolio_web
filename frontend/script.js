@@ -4,12 +4,14 @@
  */
 
 // ==================== CONFIGURATION ====================
-// Change this to your backend URL based on your environment
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://your-backend-domain.com/api'
-  : 'http://localhost:5000/api';
+// API_BASE can be injected by hosting (e.g. Vercel env). Default behavior:
+// - If `window.API_BASE_URL` is set by the host, use it
+// - If the page is served over HTTP(S), use `location.origin` (same origin as the page)
+// - Otherwise fall back to a sensible local dev URL (http://localhost:5001)
+const API_BASE_URL = window.API_BASE_URL
+  || (location && location.protocol && location.protocol.startsWith('http') ? location.origin : 'http://localhost:5001');
 
-console.log('📡 API Base URL:', API_BASE_URL);
+console.log('📡 API Base URL (resolved):', API_BASE_URL);
 
 // ==================== DOM READY ====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -87,13 +89,8 @@ async function loadProjects() {
 
   try {
     console.log('🔄 Fetching projects from API...');
-    
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const base = API_BASE_URL ? `${API_BASE_URL}/api` : '/api';
+    const response = await fetch(`${base}/projects`, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -138,17 +135,20 @@ function displayProjects(projects) {
       ? project.technologies.join(', ')
       : project.technologies || 'Various Technologies';
 
-    const linkHTML = project.link
-      ? `<a href="${project.link}" target="_blank" rel="noopener noreferrer">View Project</a>`
-      : '<span style="color: #ccc;">Link unavailable</span>';
+    const liveHTML = project.link
+      ? `<a class="project-link" href="${project.link}" target="_blank" rel="noopener noreferrer">Live</a>`
+      : '';
+    const githubHTML = project.github
+      ? `<a class="project-link" href="${project.github}" target="_blank" rel="noopener noreferrer">GitHub</a>`
+      : '';
 
     return `
       <div class="project-card">
-        ${project.image ? `<div class="project-image" style="${imageStyle}" style="height: 200px;"></div>` : ''}
+        ${project.image ? `<div class="project-image" style="${imageStyle}; height:200px; border-radius:8px;"></div>` : ''}
         <h3>${escapeHtml(project.title)}</h3>
         <p>${escapeHtml(project.description)}</p>
         <p class="technologies"><strong>Tech Stack:</strong> ${escapeHtml(technologiesText)}</p>
-        ${linkHTML}
+        <div class="project-links">${liveHTML} ${githubHTML}</div>
       </div>
     `;
   }).join('');
