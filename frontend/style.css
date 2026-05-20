@@ -126,6 +126,16 @@ section {
   background: var(--light-bg);
   color: var(--text-dark);
 }
+  .about-content {
+    max-width: 900px;
+    margin: auto;
+  }
+  .about-content p {
+    margin-bottom: 50px;
+  }
+  .about-content h3 {
+    margin-top: 20px;
+  }
 
 /* ================= CARDS ================= */
 .project-card,
@@ -205,5 +215,5 @@ footer {
 
   .hero-title {
     font-size: 2rem;
-  }
+  } 
 }
