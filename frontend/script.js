@@ -9,7 +9,7 @@
 // - If the page is served over HTTP(S), use `location.origin` (same origin as the page)
 // - Otherwise fall back to a sensible local dev URL (http://localhost:5001)
 const API_BASE_URL = window.API_BASE_URL
-  || (location && location.protocol && location.protocol.startsWith('http') ? location.origin : 'http://localhost:5001');
+  || (location && (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:5000' : 'https://myportfolio-web-2.onrender.com');
 
 console.log('📡 API Base URL (resolved):', API_BASE_URL);
 
@@ -133,7 +133,7 @@ function displayProjects(projects) {
 
     const technologiesText = Array.isArray(project.technologies)
       ? project.technologies.join(', ')
-      : project.technologies || 'Various Technologies';
+      : project.technologies || project.tech || 'Various Technologies';
 
     const liveHTML = project.link
       ? `<a class="project-link" href="${project.link}" target="_blank" rel="noopener noreferrer">Live</a>`

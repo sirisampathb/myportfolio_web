@@ -34,6 +34,16 @@ const Project = sequelize.define("Project", {
   link: {
     type: DataTypes.STRING,
   },
+  image: {
+    type: DataTypes.STRING,
+  },
+  github: {
+    type: DataTypes.STRING,
+  },
+  featured: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 });
 
 /* ================= ROUTES ================= */
@@ -66,7 +76,7 @@ app.post("/api/projects", async (req, res) => {
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 5000;
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   console.log("✅ Database connected");
 
   app.listen(PORT, () => {
